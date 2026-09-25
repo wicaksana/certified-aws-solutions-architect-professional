@@ -12,6 +12,15 @@
 - This root container can contain other containers, this containers are known as **Organizational Units (OU)**
 - OUs can contains accounts (Management/Member accounts) or other OUs
 
+## Management account
+
+- The central foundational AWS account that creates & governs an AWS Organization
+- Primary functions:
+   * Consolidated billing
+   * Organizational governance -- the only account that can create OUs & define organizational boundaries, author and apply SCPs.
+   * Account lifecycle management -- it has the authority to programmatically create new member accounts, invite existing standalone AWS accounts to join the org, and remove member accounts from the org.
+   * Service delegation -- delegate the administration of organization-wide services to specific member accounts. 
+
 ## Consolidated Billing
 
 - It is an important feature of AWS Organizations
