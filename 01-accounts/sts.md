@@ -30,4 +30,10 @@
 - Solution: 
     - Revoke all existing sessions, by applying an `AWSRevokeOlderSessions` inline policy to the role. This will apply to all existing sessions, sessions created afterwards will not be affected
     - We can not manually revoke credentials!
+ 
+## API selection: Standard vs Web Identity vs SAML
 
+- `sts:AssumeRole` ==> standard AWS principals (IAM users or other roles) to assume a role.
+- `sts:AssumeRoleWithWebIdentity` ==> Used for OIDC public providers. Ideal for mobile apps or external integrations.
+- `stsAssumeRoleWithSAML` ==> used specifically for enterprise SAML 2.0 identity providers 
+- https://www.youtube.com/watch?v=pnpr4Y_M8Vs
