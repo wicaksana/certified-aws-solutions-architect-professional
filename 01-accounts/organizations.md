@@ -21,8 +21,23 @@
 
 ## Best Practices
 
-- Have a single account into which users can log into and assume IAM roles in order to access other accounts from the org
-- The account with all the identities may be the Management Account or it can be another Member Account (*Login Account*)
+- Centrally manage user access accross multiple AWS accounts using AWS IAM Identity Center rather than manually pooling IAM users in a single central account:
+    * Eliminate standard IAM users & their long-term access key entirely
+    * IAM Identity Center integrates natively with AWS Organizations to centrally access control seamlessly:
+        - External federation (idP)
+        - Permission sets -- define reusable access templates (permission Sets) instead of manually writing and provisioning cross-account IAM roles
+        - Temporary credentials -- users authenticate once via SSO and are granted temporary, short-lived session credentials
+     
+- For reference, the legacy approach (without using IAM Identity Center) is the manual Hub and Spoke identity pattern:
+    * single user pool: create all IAM users in one dedicated "security" or "identity" AWS account. These users are granted zero direct permissions to create or modify infrastructure in this account.
+    * Cross-account trust: you create IAM roles in the destination "Resource" accounts (e.g. Development, Production) and configure their trust policies to allow the Identity account's users to assume them.
+    * Assume Role (`sts:AssumeRole`) -- users log into the identity account and explicitly assume the target role to obtain temporary credentials to work in the Resource account.
+- Security guardrails for centralized IAM roles:
+    * enforce MFA on role assumption
+    * apply the principle of least privilege
+    * use SCPs to establish maximum permission guardrails (SCPs apply to all IAM roles and cannot be overriden by local account permissions)
+    * Set strict session durations -- restrict the maximum session duration for assumed roles.
+    * Require external IDs for 3Ps 
 
 ## `OrganizationAccountAccessRole`
 
