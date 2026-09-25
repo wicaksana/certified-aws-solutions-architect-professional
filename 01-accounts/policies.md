@@ -83,6 +83,23 @@
 - Policy evaluation logic - different account:
     ![policy evaluation logic - different account](images/PolicyEvaluation2.png)
 
+## IAM Access Advisor
+
+- To show you the "last accessed" timestamp for AWS services.
+- Only checks historical timestamps.
+- It displays list of all AWS services that entity is permitted to access, alongside the exact date and time the service was last used.
+- Primary use case: to remove unnecessarily broad permission. E.g. if a developer's role has `FullAWSAccess` but Access Advisor shows they have only touched S3 and EC2 in the last 90 days, you can confidently safely restrict their IAM policy to only those 2 services.
+
+## IAM Access analyzer
+
+- Much more comprehensive, sophisticated security suite.
+- In addition to looking at historical timestamps, it actively analyzes your configurations using "provable security" to detect risks.
+- Capabilities:
+    * Access findings (external & internal) -- continuously monitors your resource-based policies
+    * Policy generation -- point Access Analyzer at your AWS CloudTrail logs to review a role's actual API activity over a specified period and automatically generate a highly restrictive, fine-grained JSON policy tailored exactly to what the application needs.
+    * policy validation -- runs over 100 automated checks when you write/edit an IAM policy.
+    * Unused access management -- at the AWS Organization level, it provides a centralized dashboard to identify unused roles, inactive access keys, unused password, and dormant permission across all of your accounts to streamline security audits.
+
 ## AWS Policy Simulator
 
 - When creating new custom policies you can test it here:
