@@ -87,3 +87,10 @@
             1. Remove the `FullAWSAccess` policy
             2. Add any services which should be allowed in a new policy
         - Allow lists are more secure, but they require more admin overhead
+- SCPs do not affect users or roles in Management account.
+- SCP *does restrict* the root user of any member account.
+- Implicit deny from detached policies -- By default, AWS attaches a `FullAWSAccess` (`Allow *`) SCP to every node. If a scenario describes removing this default policy without attaching a replacement `Allow` policy, the result is an immediate implicit deny for all actions in that account or OU.
+- SCPs does not affect AWS Service-linked roles.
+- Enforcing data perimeters -- SCPs are heavily tested as a tool to build data perimeters. For example: using SCPs with condition keys like `aws:RequestedRegion` to prevent deployments in unauthorized regions, or `ec2:InstanceType` to block developers from launching expensive instance families.
+- The "Deny Leave Organization" role -- how to prevent member accounts from unlinking themselves from the master payer? create an SCP that explicitly denies `organizations:LeavingOrganization`
+- https://www.youtube.com/watch?v=VSLOE_y-DDs
