@@ -7,3 +7,7 @@
     - **Inherent**: something we are, example: fingerprint, face, voice, iris
     - **Location**: a location (physical) or which network we are connected to (corporate wifi)
 - More factors means more security, harder to bypass by an intruder
+- Three primary mechanisms to enforce MFA:
+    * AWS IAM Identity Center (recommended)
+    * IAM policy-based enforcement (for local IAM users) --> `"aws:MultiFactorAuthPresent": "false"`
+    * SCPs via AWS Organizations -- deploy an SCP to the organization root or specific OUs --> `"aws:MultiFactorAuthPresent": "false"`
