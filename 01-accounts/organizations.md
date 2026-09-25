@@ -41,9 +41,17 @@
 
 ## `OrganizationAccountAccessRole`
 
-- This is an IAM role used to access the newly added/created account in an organization
-- This role will be created automatically if we create the account from an existing organization
-- This role has to be created manually in the member account if the account was invited into the organization
+- This is a default IAM role automatically created by AWS Organizations when you provision a new member account within your organization.
+- This role has to be created manually in the member account if the account was invited into the organization.
+- Upon creation, the role is automatically granted the AWS-managed `AdministratorAccess` policy, giving it complete control over all resources in the new account.
+- The role's trust relationship is hardcoded to trust the Organization's management account --> only identities residing in the Management account can attempt to use it.
+- To use this role, a user or service in the Management account must be granted the `sts:AssumeRole` permission to obtain temporary administrative credentials for the member account.
+- Use cases:
+   * Account bootstrapping -- eliminates the need to log in with the new account's root email and password. Usually being used to programmatically deploy security baselines, establish networking, or integrate the account with IAM Identity Center immediately after creation.
+   * emergency break-glass access -- if standard identity federation or SSO fails, this role provides a guaranteed administrative entry point from the Management account.
+- Best practices:
+   * Strict access control -- only your most privileged admins or automated account-vending pipelines should have an IAM policy allowing `sts:AssumeRole` on `arn:aws:iam::*:role/OrganizationAccountAccessRole`
+   * Audit & monitor: ensure AWS CloudTrail is active and monitor logs for `AssumeRole` API calls targeting this role.
 
 # Service Control Policies (SCP)
 
