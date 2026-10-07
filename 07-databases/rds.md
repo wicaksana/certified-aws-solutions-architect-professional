@@ -147,6 +147,46 @@
     - Can enforce SSL/TLS connection
     - Can reduce failover time by over 60% in case of Aurora
     - Abstracts the failure of a database away for our application
+ 
+### Expose database connection pooling to multi-VPC architectures (via AWS PrivateLink), on-premises networks over Direct Connect/VPN, or external consumers that cannot directly access the private RDS Proxy VPC
+
+Primary Use Cases
+1. Exposing RDS Proxy via AWS PrivateLink (VPC Endpoint Service): RDS Proxy does not natively act as a PrivateLink Endpoint Service. Placing an internal NLB in front of RDS Proxy allows you to create a VPC Endpoint Service powered by the NLB, letting client accounts connect privately across VPCs without VPC Peering.
+2. On-Premises Access Over Non-Routable Networks: Simplifies routing for on-premises clients connecting through Direct Connect or Transit Gateway when strict centralized egress/ingress through standard load-balancer endpoints is mandated.
+3. Static Egress IPs: If external clients require deterministic static IPs for firewall allow-listing, an internet-facing or internal NLB provides static Elastic IPs while forwarding to RDS Proxy.
+
+```
+                       AWS PrivateLink / On-Prem / VPC
+                                     │
+                                     ▼
+                     ┌───────────────────────────────┐
+                     │     Network Load Balancer     │
+                     │  (Layer 4 TCP Listener :5432) │
+                     └───────────────┬───────────────┘
+                                     │
+                        Target Group (IP Target Type)
+                                     │
+                                     ▼
+                     ┌───────────────────────────────┐
+                     │           RDS Proxy           │
+                     │  (VPC Private IPs / ENIs)     │
+                     └───────────────┬───────────────┘
+                                     │
+                                     ▼
+                     ┌───────────────────────────────┐
+                     │    Aurora / RDS PostgreSQL    │
+                     └───────────────────────────────┘
+```
+
+Steps:
+1. Traffic Ingestion: The NLB accepts standard Layer 4 TCP database traffic (e.g., port 5432 for PostgreSQL or 3306 for MySQL).
+2. Layer 4 Passthrough: The NLB forwards the raw TCP stream to the target IP addresses without terminating or inspecting the SQL/TLS handshake.
+3. Connection Pooling & Authentication: RDS Proxy terminates TLS (if configured), handles IAM or Secrets Manager credential evaluation, multiplexes client connections, and passes pooled queries to the RDS/Aurora cluster.
+
+Key Requirements & Constraints
+1. No Direct DNS Target in NLB: RDS Proxy provides a DNS endpoint (e.g., my-proxy.proxy-xxxxxx.region.rds.amazonaws.com), but NLB Target Groups require either Instance IDs or IP addresses. You must target the Elastic Network Interface (ENI) private IP addresses of the RDS Proxy.
+2. Dynamic IP Drift: RDS Proxy ENI IPs can change during AWS maintenance, scaling, or AZ reconfigurations. Production setups require an automated IP synchronizer (e.g., a scheduled Lambda function or EventBridge rule).
+3. TLS / SSL Termination: TLS termination must not occur at the NLB. The database client connects either via plain TCP or negotiates TLS directly through to RDS Proxy. Ensure the client handles certificate validation against the Proxy endpoint name or disables hostname verification if connecting via NLB DNS.
 
 ## RDS Custom
 
